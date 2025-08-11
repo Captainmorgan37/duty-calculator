@@ -81,7 +81,6 @@ def split_duty_calculator():
         st.warning("Please enter valid times in all fields.")
         return
 
-    # Calculate duty start and end with offsets
     duty_start_dt = time_to_datetime(first_dep_time) - timedelta(minutes=60)
     duty_start = duty_start_dt.time()
     
@@ -93,7 +92,6 @@ def split_duty_calculator():
     dt_dep = time_to_datetime(second_dep)
     dt_end = time_to_datetime(duty_end)
 
-    # Adjust for cross-midnight
     if dt_land < dt_start:
         dt_land += timedelta(days=1)
     if dt_dep < dt_land:
@@ -105,22 +103,29 @@ def split_duty_calculator():
     base_allowable = 14
     if ground_rest >= 6:
         extension = min((ground_rest - 2) / 2, 3)
-        allowable_duty = base_allowable + extension
+        allowable_duty_hours = base_allowable + extension
     else:
-        allowable_duty = base_allowable
+        allowable_duty_hours = base_allowable
 
-    actual_duty = (dt_end - dt_start).total_seconds() / 3600
+    actual_duty_hours = (dt_end - dt_start).total_seconds() / 3600
+
+    # Convert decimal hours to timedelta for formatting
+    allowable_duty_td = timedelta(hours=allowable_duty_hours)
+    actual_duty_td = timedelta(hours=actual_duty_hours)
 
     st.write(f"**Duty Start Time (calculated):** {duty_start.strftime('%H:%M')}")
     st.write(f"**Duty End Time (calculated):** {duty_end.strftime('%H:%M')}")
     st.write(f"**Ground Rest Duration:** {ground_rest:.2f} hours")
-    st.write(f"**Allowable Duty Length:** {allowable_duty:.2f} hours")
-    st.write(f"**Actual Duty Length:** {actual_duty:.2f} hours")
+    st.write(f"**Allowable Duty Length:** {format_timedelta(allowable_duty_td)}")
+    st.write(f"**Actual Duty Length:** {format_timedelta(actual_duty_td)}")
 
-    if actual_duty > allowable_duty:
-        st.markdown(f"<span style='color:red;'>Over allowable duty by {actual_duty - allowable_duty:.2f} hours</span>", unsafe_allow_html=True)
+    if actual_duty_hours > allowable_duty_hours:
+        over_hours = actual_duty_hours - allowable_duty_hours
+        over_td = timedelta(hours=over_hours)
+        st.markdown(f"<span style='color:red;'>Over allowable duty by {format_timedelta(over_td)}</span>", unsafe_allow_html=True)
     else:
         st.markdown(f"<span style='color:green;'>Within allowable duty</span>", unsafe_allow_html=True)
+
 
 tabs = st.tabs(["Regular Duty", "Split Duty"])
 
