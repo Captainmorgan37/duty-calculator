@@ -35,8 +35,8 @@ def regular_duty_calculator():
     st.header("Regular Duty Calculator")
     max_duty = st.number_input("Max Duty Length (hours)", min_value=1, max_value=24, value=14, key="reg_max_duty")
     
-    first_flight_dep_input = st.text_input("First Flight Departure Time (HHMM or HH:MM)", value="0800", key="first_flight_dep")
-    last_flight_arr_input = st.text_input("Last Flight Arrival Time (HHMM or HH:MM)", value="2200", key="last_flight_arr")
+    first_flight_dep_input = st.text_input("First Flight Departure Time (HHMM or HH:MM)", value="0800", key="reg_first_flight_dep")
+    last_flight_arr_input = st.text_input("Last Flight Arrival Time (HHMM or HH:MM)", value="2200", key="reg_last_flight_arr")
 
     first_dep_time = parse_time(first_flight_dep_input)
     last_arr_time = parse_time(last_flight_arr_input)
@@ -68,8 +68,8 @@ def split_duty_calculator():
     st.header("Split Duty Calculator")
     
     first_flight_dep_input = st.text_input("First Flight Departure Time (HHMM or HH:MM)", value="0700", key="split_first_flight_dep")
-    first_flight_arrival_input = st.text_input("Landing Time Before Split (HHMM or HH:MM)", value="1100", key="split_land")
-    second_flight_dep_input = st.text_input("Departure Time After Split (HHMM or HH:MM)", value="1800", key="split_dep")
+    first_flight_arrival_input = st.text_input("Landing Time Before Split (HHMM or HH:MM)", value="1100", key="split_first_flight_arrival")
+    second_flight_dep_input = st.text_input("Departure Time After Split (HHMM or HH:MM)", value="1800", key="split_second_flight_dep")
     last_flight_arr_input = st.text_input("Last Flight Arrival Time (HHMM or HH:MM)", value="2300", key="split_last_flight_arr")
 
     first_dep_time = parse_time(first_flight_dep_input)
@@ -129,8 +129,3 @@ with tabs[0]:
 
 with tabs[1]:
     split_duty_calculator()
-
-
-with tabs[1]:
-    split_duty_calculator()
-
