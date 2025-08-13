@@ -69,7 +69,8 @@ with col2:
 # Tabs for the three calculators
 tab1, tab2, tab3 = st.tabs(["Duty Calculator", "Split Duty Calculator", "Rest Calculator"])
 
-def single_duty_calculator():
+with tab1:
+    st.header("Duty Calculator")
     st.markdown("**<span style='color:red;'>MAX DUTY: 14 HOURS</span>**", unsafe_allow_html=True)
 
     dep_str = st.text_input("First Flight Departure Time (Local)", value="08:00")
@@ -190,5 +191,6 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
