@@ -3,8 +3,19 @@ from datetime import datetime, timedelta
 
 # Helper to parse freeform time
 def parse_time(time_str):
+    if not time_str:
+        return None
+    time_str = time_str.strip()
+
+    # If input is "HHMM" without colon, insert it
+    if time_str.isdigit() and len(time_str) in (3, 4):
+        # e.g. "830" → "08:30"
+        hours = time_str[:-2]
+        minutes = time_str[-2:]
+        time_str = f"{int(hours):02d}:{int(minutes):02d}"
+
     try:
-        return datetime.strptime(time_str.strip(), "%H:%M").time()
+        return datetime.strptime(time_str, "%H:%M").time()
     except:
         return None
 
@@ -119,3 +130,4 @@ with tab2:
 
 with tab3:
     rest_calculator()
+
