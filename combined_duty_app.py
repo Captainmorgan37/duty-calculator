@@ -69,22 +69,42 @@ with col2:
 # Tabs for the three calculators
 tab1, tab2, tab3 = st.tabs(["Duty Calculator", "Split Duty Calculator", "Rest Calculator"])
 
-with tab1:
-    st.header("Duty Calculator")
-    duty_dep_input = st.text_input("First Flight Departure Time (HHMM or HH:MM)", value=st.session_state.duty_dep, key="duty_dep")
-    duty_arr_input = st.text_input("Last Flight Arrival Time (HHMM or HH:MM)", value=st.session_state.duty_arr, key="duty_arr")
+def single_duty_calculator():
+    st.markdown("**<span style='color:red;'>MAX DUTY: 14 HOURS</span>**", unsafe_allow_html=True)
 
-    dep_time = parse_time(duty_dep_input)
-    arr_time = parse_time(duty_arr_input)
+    dep_str = st.text_input("First Flight Departure Time (Local)", value="08:00")
+    arr_str = st.text_input("Last Flight Arrival Time (Local)", value="17:00")
+
+    dep_time = parse_time(dep_str)
+    arr_time = parse_time(arr_str)
 
     if dep_time and arr_time:
-        duty_start_dt = time_to_datetime(dep_time) - timedelta(minutes=60)
-        duty_end_dt = time_to_datetime(arr_time) + timedelta(minutes=15)
-        duty_length = duty_end_dt - duty_start_dt
+        duty_start = datetime.combine(datetime.today(), dep_time) - timedelta(minutes=60)
+        duty_end = datetime.combine(datetime.today(), arr_time) + timedelta(minutes=15)
 
-        st.write(f"Duty Start (60 min before first departure): {duty_start_dt.time().strftime('%H:%M')}")
-        st.write(f"Duty End (15 min after last arrival): {duty_end_dt.time().strftime('%H:%M')}")
-        st.write(f"Total Duty Length: {format_timedelta(duty_length)}")
+        duty_length_td = duty_end - duty_start
+        duty_length_hours = duty_length_td.total_seconds() / 3600
+
+        # Determine colour coding
+        if duty_length_hours < 13:
+            color = "green"
+        elif 13 <= duty_length_hours < 14:
+            color = "yellow"
+        else:
+            color = "red"
+
+        duty_length_str = f"{int(duty_length_td.seconds // 3600)}:{int((duty_length_td.seconds % 3600) // 60):02d}"
+
+        st.markdown(f"**Duty Start:** {duty_start.strftime('%H:%M')}")
+        st.markdown(f"**Duty End:** {duty_end.strftime('%H:%M')}")
+        st.markdown(f"<span style='color:{color}; font-weight:bold;'>Duty Length: {duty_length_str}</span>", unsafe_allow_html=True)
+
+        # Earliest Next Departure
+        if duty_length_hours < 14:
+            earliest_next_dep = duty_end + timedelta(hours=11)
+            st.markdown(f"**Earliest Next Departure:** {earliest_next_dep.strftime('%H:%M')}")
+        else:
+            st.markdown("**Earliest Next Departure:** —")
 
 with tab2:
     st.header("Split Duty Calculator")
@@ -170,4 +190,5 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
