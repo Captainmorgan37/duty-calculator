@@ -1,173 +1,109 @@
 import streamlit as st
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
 
+# ---------- TAB 1: Single Duty Calculator ----------
+def single_duty_calculator():
+    st.markdown("**<span style='color:red;'>MAX DUTY: 14 HOURS</span>**", unsafe_allow_html=True)
+
+    dep_time = st.time_input("First Flight Departure Time (Local)")
+    arr_time = st.time_input("Last Flight Arrival Time (Local)")
+
+    # Automatically add pre- and post-flight buffers
+    duty_start = datetime.combine(datetime.today(), dep_time) - timedelta(minutes=60)
+    duty_end = datetime.combine(datetime.today(), arr_time) + timedelta(minutes=15)
+
+    duty_length_td = duty_end - duty_start
+    duty_length_hours = duty_length_td.total_seconds() / 3600
+
+    # Determine colour coding for duty length
+    if duty_length_hours < 13:
+        color = "green"
+    elif 13 <= duty_length_hours < 14:
+        color = "yellow"
+    else:
+        color = "red"
+
+    duty_length_str = f"{int(duty_length_td.seconds // 3600)}:{int((duty_length_td.seconds % 3600) // 60):02d}"
+
+    st.markdown(f"**Duty Start:** {duty_start.strftime('%H:%M')}")
+    st.markdown(f"**Duty End:** {duty_end.strftime('%H:%M')}")
+    st.markdown(f"<span style='color:{color}; font-weight:bold;'>Duty Length: {duty_length_str}</span>", unsafe_allow_html=True)
+
+    # Earliest Next Departure calculation
+    if duty_length_hours < 14:
+        earliest_next_dep = duty_end + timedelta(hours=11)
+        st.markdown(f"**Earliest Next Departure:** {earliest_next_dep.strftime('%H:%M')}")
+    else:
+        st.markdown("**Earliest Next Departure:** —")
+
+# ---------- TAB 2: Split Duty Calculator ----------
+def split_duty_calculator():
+    split_first_flight_dep = st.time_input("First Flight Departure Time (Local)", key="split_first_flight_dep_unique")
+    split_last_flight_arr = st.time_input("Last Flight Arrival Time (Local)", key="split_last_flight_arr_unique")
+    split_rest_start = st.time_input("Split Rest Start Time (Local)", key="split_rest_start_unique")
+    split_rest_end = st.time_input("Split Rest End Time (Local)", key="split_rest_end_unique")
+
+    # Initial duty calculation
+    first_duty_start = datetime.combine(datetime.today(), split_first_flight_dep) - timedelta(minutes=60)
+    split_rest_start_dt = datetime.combine(datetime.today(), split_rest_start)
+    first_duty = split_rest_start_dt - first_duty_start
+
+    # Second duty calculation
+    split_rest_end_dt = datetime.combine(datetime.today(), split_rest_end)
+    last_duty_end = datetime.combine(datetime.today(), split_last_flight_arr) + timedelta(minutes=15)
+    second_duty = last_duty_end - split_rest_end_dt
+
+    # Total duty
+    total_duty = first_duty + second_duty
+
+    # Format time output
+    def format_td(td):
+        hours = td.seconds // 3600
+        minutes = (td.seconds % 3600) // 60
+        return f"{hours}:{minutes:02d}"
+
+    st.markdown(f"**First Duty Period:** {format_td(first_duty)}")
+    st.markdown(f"**Second Duty Period:** {format_td(second_duty)}")
+    st.markdown(f"**Total Duty Time:** {format_td(total_duty)}")
+
+# ---------- TAB 3: Assumed vs Deemed Rest Calculator ----------
+def rest_calculator():
+    landing_time = st.time_input("Landing Time (Local)")
+    custom_duty_end = st.time_input("Custom Duty End Time (Optional)", value=None)
+
+    # Always add 15 minutes to get default duty end
+    default_duty_end = datetime.combine(datetime.today(), landing_time) + timedelta(minutes=15)
+
+    # Use custom if provided
+    duty_end_time = datetime.combine(datetime.today(), custom_duty_end) if custom_duty_end else default_duty_end
+
+    # Determine if deemed rest applies (duty end 20:00–02:00 local)
+    if 20 <= duty_end_time.hour or duty_end_time.hour < 2:
+        rest_type = "Deemed Rest"
+        rest_end_time = duty_end_time + timedelta(hours=10)
+    else:
+        rest_type = "Assumed Rest"
+        rest_end_time = datetime.combine(datetime.today(), datetime.strptime("06:00", "%H:%M").time())
+
+    callout_time = rest_end_time
+    earliest_departure = callout_time + timedelta(hours=2, minutes=30)
+
+    st.markdown(f"**Rest Type:** {rest_type}")
+    st.markdown(f"**Rest End Time:** {rest_end_time.strftime('%H:%M')}")
+    st.markdown(f"**Earliest Callout:** {callout_time.strftime('%H:%M')}")
+    st.markdown(f"**Earliest Departure After Callout:** {earliest_departure.strftime('%H:%M')}")
+
+# ---------- MAIN APP ----------
 st.set_page_config(layout="wide")
+st.title("Crew Duty & Rest Tools")
 
-# Helper functions
-def parse_time(t_str):
-    """Parse HHMM or HH:MM strings to datetime.time, or return None if invalid."""
-    t_str = t_str.strip()
-    try:
-        if ':' in t_str:
-            dt = datetime.strptime(t_str, "%H:%M")
-        else:
-            dt = datetime.strptime(t_str.zfill(4), "%H%M")
-        return dt.time()
-    except:
-        return None
-
-def time_to_datetime(t):
-    """Convert datetime.time to datetime.datetime for today."""
-    return datetime.combine(datetime.today(), t)
-
-def format_timedelta(td):
-    """Format timedelta as HH:MM string."""
-    total_minutes = int(td.total_seconds() // 60)
-    h = total_minutes // 60
-    m = total_minutes % 60
-    return f"{h:02d}:{m:02d}"
-
-# Initialize session state for inputs if not present
-def init_session_state():
-    defaults = {
-        # Tab 1: Duty Calculator
-        "duty_dep": "",
-        "duty_arr": "",
-        # Tab 2: Split Duty Calculator
-        "split_first_dep": "",
-        "split_first_arrival": "",
-        "split_second_dep": "",
-        "split_last_arrival": "",
-        # Tab 3: Rest Calculator
-        "rest_landing": "",
-        "rest_duty_end": "",
-    }
-    for k, v in defaults.items():
-        if k not in st.session_state:
-            st.session_state[k] = v
-
-init_session_state()
-
-# Clear all relevant inputs except other settings
-def clear_all_inputs():
-    keys_to_clear = [
-        "duty_dep", "duty_arr",
-        "split_first_dep", "split_first_arrival", "split_second_dep", "split_last_arrival",
-        "rest_landing", "rest_duty_end",
-    ]
-    for key in keys_to_clear:
-        st.session_state[key] = ""
-
-# Title and Clear All button at top-right
-col1, col2 = st.columns([5,1])
-with col1:
-    st.title("Duty & Rest Calculators")
-with col2:
-    if st.button("Clear All"):
-        clear_all_inputs()
-
-# Tabs for the three calculators
-tab1, tab2, tab3 = st.tabs(["Duty Calculator", "Split Duty Calculator", "Rest Calculator"])
+tab1, tab2, tab3 = st.tabs(["Single Duty", "Split Duty", "Rest Calculator"])
 
 with tab1:
-    st.header("Duty Calculator")
-    duty_dep_input = st.text_input("First Flight Departure Time (HHMM or HH:MM)", value=st.session_state.duty_dep, key="duty_dep")
-    duty_arr_input = st.text_input("Last Flight Arrival Time (HHMM or HH:MM)", value=st.session_state.duty_arr, key="duty_arr")
-
-    dep_time = parse_time(duty_dep_input)
-    arr_time = parse_time(duty_arr_input)
-
-    if dep_time and arr_time:
-        duty_start_dt = time_to_datetime(dep_time) - timedelta(minutes=60)
-        duty_end_dt = time_to_datetime(arr_time) + timedelta(minutes=15)
-        duty_length = duty_end_dt - duty_start_dt
-
-        st.write(f"Duty Start (60 min before first departure): {duty_start_dt.time().strftime('%H:%M')}")
-        st.write(f"Duty End (15 min after last arrival): {duty_end_dt.time().strftime('%H:%M')}")
-        st.write(f"Total Duty Length: {format_timedelta(duty_length)}")
+    single_duty_calculator()
 
 with tab2:
-    st.header("Split Duty Calculator")
-    split_first_dep_input = st.text_input("First Flight Departure Time (HHMM or HH:MM)", value=st.session_state.split_first_dep, key="split_first_dep")
-    split_first_arrival_input = st.text_input("Landing Time Before Split (HHMM or HH:MM)", value=st.session_state.split_first_arrival, key="split_first_arrival")
-    split_second_dep_input = st.text_input("Departure Time After Split (HHMM or HH:MM)", value=st.session_state.split_second_dep, key="split_second_dep")
-    split_last_arrival_input = st.text_input("Last Flight Arrival Time (HHMM or HH:MM)", value=st.session_state.split_last_arrival, key="split_last_arrival")
-
-    first_dep = parse_time(split_first_dep_input)
-    first_arrival = parse_time(split_first_arrival_input)
-    second_dep = parse_time(split_second_dep_input)
-    last_arrival = parse_time(split_last_arrival_input)
-
-    if None not in (first_dep, first_arrival, second_dep, last_arrival):
-        dt_start = time_to_datetime(first_dep) - timedelta(minutes=60)
-        dt_land = time_to_datetime(first_arrival)
-        dt_dep = time_to_datetime(second_dep)
-        dt_end = time_to_datetime(last_arrival) + timedelta(minutes=15)
-
-        # Handle cross-midnight
-        if dt_land < dt_start:
-            dt_land += timedelta(days=1)
-        if dt_dep < dt_land:
-            dt_dep += timedelta(days=1)
-        if dt_end < dt_dep:
-            dt_end += timedelta(days=1)
-
-        ground_rest = (dt_dep - dt_land).total_seconds() / 3600
-        allowable_duty = 14
-        if ground_rest >= 6:
-            allowable_duty += min((ground_rest - 2)/2, 3)
-        duty_length = (dt_end - dt_start).total_seconds() / 3600
-
-        st.write(f"Duty Start (60 min before first departure): {dt_start.time().strftime('%H:%M')}")
-        st.write(f"Duty End (15 min after last arrival): {dt_end.time().strftime('%H:%M')}")
-        st.write(f"Ground Rest Duration: {ground_rest:.2f} hours")
-        st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
-        st.write(f"Actual Duty Length: {format_timedelta(timedelta(hours=duty_length))}")
-
-        if duty_length > allowable_duty:
-            st.markdown(f"<span style='color:red;'>Over allowable duty by {format_timedelta(timedelta(hours=duty_length - allowable_duty))}</span>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<span style='color:green;'>Within allowable duty</span>", unsafe_allow_html=True)
+    split_duty_calculator()
 
 with tab3:
-    st.header("Assumed vs Deemed Rest Calculator")
-    landing_input = st.text_input("Crew Landing Time (HHMM or HH:MM)", value=st.session_state.rest_landing, key="rest_landing")
-    duty_end_input = st.text_input("Override Duty End Time (optional)", value=st.session_state.rest_duty_end, key="rest_duty_end")
-
-    landing_time = parse_time(landing_input)
-
-    duty_end_time = parse_time(duty_end_input) if duty_end_input.strip() else None
-
-    if landing_time:
-        default_duty_end_dt = time_to_datetime(landing_time) + timedelta(minutes=15)
-        if duty_end_time:
-            duty_end_dt = time_to_datetime(duty_end_time)
-        else:
-            duty_end_dt = default_duty_end_dt
-
-        # Check deemed rest window (20:00 to 02:00 inclusive)
-        duty_end_hour = duty_end_dt.time().hour
-        duty_end_min = duty_end_dt.time().minute
-        # Condition: duty_end between 20:00 and 23:59 or 00:00 to 02:00 inclusive
-        if (duty_end_hour >= 20) or (duty_end_hour < 2) or (duty_end_hour == 2 and duty_end_min == 0):
-            rest_end_dt = duty_end_dt + timedelta(hours=10)
-            rest_type = "Deemed Rest"
-            rest_color = "orange"
-        else:
-            # Assumed rest ends at 06:00 next day if duty ends before 6:00 else same day 06:00
-            assumed_rest_end_dt = datetime.combine(duty_end_dt.date(), time(6,0))
-            if duty_end_dt.time() >= time(6,0):
-                assumed_rest_end_dt += timedelta(days=1)
-            rest_end_dt = assumed_rest_end_dt
-            rest_type = "Assumed Rest"
-            rest_color = "green"
-
-        callout_dt = rest_end_dt
-        departure_dt = callout_dt + timedelta(hours=2, minutes=30)
-
-        st.markdown(f"**Duty End Time:** {duty_end_dt.strftime('%H:%M')}")
-        st.markdown(f"<span style='color:{rest_color}; font-weight:bold;'>Rest Type: {rest_type}</span>", unsafe_allow_html=True)
-        st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
-        st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
-        st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
-
+    rest_calculator()
