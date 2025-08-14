@@ -76,10 +76,20 @@ with tab1:
     st.header("Duty Calculator")
     st.markdown("**<span style='color:red;'>MAX DUTY: 14 HOURS</span>**", unsafe_allow_html=True)
 
-    dep_str = st.text_input("First Flight Departure Time (UTC - HHMM or HH:MM)", value=st.session_state.duty_dep, key="duty_dep")
-    arr_str = st.text_input("Last Flight Arrival Time (UTC - HHMM or HH:MM)", value=st.session_state.duty_arr, key="duty_arr")
+    # Read directly from session_state so changes trigger immediate output
+    dep_str = st.text_input(
+        "First Flight Departure Time (UTC - HHMM or HH:MM)",
+        value=st.session_state.duty_dep,
+        key="duty_dep"
+    )
+    arr_str = st.text_input(
+        "Last Flight Arrival Time (UTC - HHMM or HH:MM)",
+        value=st.session_state.duty_arr,
+        key="duty_arr"
+    )
 
-    if dep_str.strip() != "" and arr_str.strip() != "":
+    # Only run if both fields have some text
+    if dep_str.strip() and arr_str.strip():
         dep_time = parse_time(dep_str)
         arr_time = parse_time(arr_str)
 
@@ -107,6 +117,7 @@ with tab1:
                 st.markdown(f"**Earliest Next Departure:** {earliest_next_dep.strftime('%H:%M')}")
             else:
                 st.markdown("**Earliest Next Departure:** —")
+
 
 # ---------------- Tab 2: Split Duty Calculator ----------------
 with tab2:
@@ -204,3 +215,4 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
