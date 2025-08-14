@@ -133,22 +133,35 @@ with tab2:
         if dt_end < dt_dep:
             dt_end += timedelta(days=1)
 
-        ground_rest = (dt_dep - dt_land).total_seconds() / 3600
+        # Ground rest in timedelta
+        ground_rest_td = dt_dep - dt_land
+        ground_rest_hours = ground_rest_td.total_seconds() / 3600
+
         allowable_duty = 14
-        if ground_rest >= 6:
-            allowable_duty += min((ground_rest - 2)/2, 3)
-        duty_length = (dt_end - dt_start).total_seconds() / 3600
+        if ground_rest_hours >= 6:
+            allowable_duty += min((ground_rest_hours - 2) / 2, 3)
+
+        duty_length_td = dt_end - dt_start
+        duty_length_hours = duty_length_td.total_seconds() / 3600
 
         st.write(f"Duty Start (60 min before first departure): {dt_start.time().strftime('%H:%M')}")
         st.write(f"Duty End (15 min after last arrival): {dt_end.time().strftime('%H:%M')}")
-        st.write(f"Ground Rest Duration: {ground_rest:.2f} hours")
-        st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
-        st.write(f"Actual Duty Length: {format_timedelta(timedelta(hours=duty_length))}")
 
-        if duty_length > allowable_duty:
-            st.markdown(f"<span style='color:red;'>Over allowable duty by {format_timedelta(timedelta(hours=duty_length - allowable_duty))}</span>", unsafe_allow_html=True)
+        # Show ground rest in HH:MM format
+        st.write(f"Ground Rest Duration: {format_timedelta(ground_rest_td)}")
+
+        # Warning if ground rest < 6 hours
+        if ground_rest_hours < 6:
+            st.markdown("<span style='color:red; font-weight:bold;'>WARNING: Ground rest is less than 6:00 hours!</span>", unsafe_allow_html=True)
+
+        st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
+        st.write(f"Actual Duty Length: {format_timedelta(duty_length_td)}")
+
+        if duty_length_hours > allowable_duty:
+            st.markdown(f"<span style='color:red;'>Over allowable duty by {format_timedelta(timedelta(hours=duty_length_hours - allowable_duty))}</span>", unsafe_allow_html=True)
         else:
             st.markdown(f"<span style='color:green;'>Within allowable duty</span>", unsafe_allow_html=True)
+
 
 with tab3:
     st.header("Assumed vs Deemed Rest Calculator")
@@ -191,6 +204,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
