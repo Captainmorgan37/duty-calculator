@@ -27,7 +27,7 @@ def format_timedelta(td):
     m = total_minutes % 60
     return f"{h:02d}:{m:02d}"
 
-# Initialize session state for inputs if not present
+# Initialize session state for inputs & outputs if not present
 def init_session_state():
     defaults = {
         # Tab 1: Duty Calculator
@@ -41,6 +41,13 @@ def init_session_state():
         # Tab 3: Rest Calculator
         "rest_landing": "",
         "rest_duty_end": "",
+        # Shared outputs
+        "duty_start_str": "",
+        "duty_end_str": "",
+        "ground_rest_str": "",
+        "allowable_duty_str": "",
+        "actual_duty_str": "",
+        "status_message": ""
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -48,26 +55,18 @@ def init_session_state():
 
 init_session_state()
 
-def clear_inputs(tab_name):
-    tab_keys = {
-        "tab1": [
-            "duty_dep", "duty_arr",
-            "duty_start_str", "duty_end_str",
-            "allowable_duty_str", "actual_duty_str"
-        ],
-        "tab2": [
-            "split_first_dep", "split_first_arrival", "split_second_dep", "split_last_arrival",
-            "duty_start_str", "duty_end_str",
-            "ground_rest_str", "allowable_duty_str", "actual_duty_str"
-        ],
-        "tab3": [
-            "rest_landing", "rest_duty_end",
-            "duty_start_str", "duty_end_str",
-            "allowable_duty_str", "actual_duty_str"
-        ]
-    }
-
-    for key in tab_keys.get(tab_name, []):
+# Clear all relevant inputs & outputs
+def clear_all_inputs():
+    keys_to_clear = [
+        # Inputs
+        "duty_dep", "duty_arr",
+        "split_first_dep", "split_first_arrival", "split_second_dep", "split_last_arrival",
+        "rest_landing", "rest_duty_end",
+        # Outputs
+        "duty_start_str", "duty_end_str", "ground_rest_str",
+        "allowable_duty_str", "actual_duty_str", "status_message"
+    ]
+    for key in keys_to_clear:
         st.session_state[key] = ""
 
 # Title and Clear All button at top-right
@@ -82,10 +81,6 @@ with col2:
 tab1, tab2, tab3 = st.tabs(["Duty Calculator", "Split Duty Calculator", "Rest Calculator"])
 
 with tab1:
-    st.header("Standard Duty Calculator")
-    if st.button("Clear Tab 1 Data"):
-        clear_inputs("tab1")
-
     st.header("Duty Calculator")
     st.markdown("**<span style='color:red;'>MAX DUTY: 14 HOURS</span>**", unsafe_allow_html=True)
 
@@ -124,11 +119,6 @@ with tab1:
             st.markdown("**Earliest Next Departure:** —")
 
 with tab2:
-    st.header("Split Duty Calculator")
-    if st.button("Clear Tab 2 Data"):
-        clear_inputs("tab2")
-
-
     st.header("Split Duty Calculator")
     split_first_dep_input = st.text_input("First Flight Departure Time (UTC - HHMM or HH:MM)", value=st.session_state.split_first_dep, key="split_first_dep")
     split_first_arrival_input = st.text_input("Landing Time Before Split (UTC - HHMM or HH:MM)", value=st.session_state.split_first_arrival, key="split_first_arrival")
@@ -202,11 +192,6 @@ else:
 
 
 with tab3:
-    st.header("Rest Period Calculator")
-    if st.button("Clear Tab 3 Data"):
-        clear_inputs("tab3")
-
-
     st.header("Assumed vs Deemed Rest Calculator")
     landing_input = st.text_input("Crew Landing Time (HHMM or HH:MM)", value=st.session_state.rest_landing, key="rest_landing")
     duty_end_input = st.text_input("Override Duty End Time (optional)", value=st.session_state.rest_duty_end, key="rest_duty_end")
@@ -247,6 +232,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
