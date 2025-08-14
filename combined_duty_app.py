@@ -109,10 +109,10 @@ with tab1:
 
 with tab2:
     st.header("Split Duty Calculator")
-    split_first_dep_input = st.text_input("First Flight Departure Time (HHMM or HH:MM)", value=st.session_state.split_first_dep, key="split_first_dep")
-    split_first_arrival_input = st.text_input("Landing Time Before Split (HHMM or HH:MM)", value=st.session_state.split_first_arrival, key="split_first_arrival")
-    split_second_dep_input = st.text_input("Departure Time After Split (HHMM or HH:MM)", value=st.session_state.split_second_dep, key="split_second_dep")
-    split_last_arrival_input = st.text_input("Last Flight Arrival Time (HHMM or HH:MM)", value=st.session_state.split_last_arrival, key="split_last_arrival")
+    split_first_dep_input = st.text_input("First Flight Departure Time (UTC - HHMM or HH:MM)", value=st.session_state.split_first_dep, key="split_first_dep")
+    split_first_arrival_input = st.text_input("Landing Time Before Split (UTC - HHMM or HH:MM)", value=st.session_state.split_first_arrival, key="split_first_arrival")
+    split_second_dep_input = st.text_input("Departure Time After Split (UTC - HHMM or HH:MM)", value=st.session_state.split_second_dep, key="split_second_dep")
+    split_last_arrival_input = st.text_input("Last Flight Arrival Time (UTC - HHMM or HH:MM)", value=st.session_state.split_last_arrival, key="split_last_arrival")
 
     first_dep = parse_time(split_first_dep_input)
     first_arrival = parse_time(split_first_arrival_input)
@@ -191,6 +191,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
