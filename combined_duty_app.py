@@ -5,8 +5,10 @@ st.set_page_config(layout="wide")
 
 # Helper functions
 def parse_time(t_str):
-    """Parse HHMM or HH:MM strings to datetime.time, or return None if invalid."""
+    """Parse HHMM or HH:MM strings to datetime.time, or return None if invalid or blank."""
     t_str = t_str.strip()
+    if not t_str:
+        return None
     try:
         if ':' in t_str:
             dt = datetime.strptime(t_str, "%H:%M")
@@ -80,6 +82,7 @@ with col2:
 # Tabs for the three calculators
 tab1, tab2, tab3 = st.tabs(["Duty Calculator", "Split Duty Calculator", "Rest Calculator"])
 
+# --- Tab 1: Duty Calculator ---
 with tab1:
     st.header("Duty Calculator")
     st.markdown("**<span style='color:red;'>MAX DUTY: 14 HOURS</span>**", unsafe_allow_html=True)
@@ -111,13 +114,13 @@ with tab1:
         st.markdown(f"**Duty End:** {duty_end.strftime('%H:%M')}")
         st.markdown(f"<span style='color:{color}; font-weight:bold;'>Duty Length: {duty_length_str}</span>", unsafe_allow_html=True)
 
-        # Earliest Next Departure
         if duty_length_hours < 14:
             earliest_next_dep = duty_end + timedelta(hours=11)
             st.markdown(f"**Earliest Next Departure:** {earliest_next_dep.strftime('%H:%M')}")
         else:
             st.markdown("**Earliest Next Departure:** —")
 
+# --- Tab 2: Split Duty Calculator ---
 with tab2:
     st.header("Split Duty Calculator")
     split_first_dep_input = st.text_input(
@@ -146,7 +149,6 @@ with tab2:
     second_dep = parse_time(split_second_dep_input)
     last_arrival = parse_time(split_last_arrival_input)
 
-    # Only run if ALL fields are filled
     if None not in (first_dep, first_arrival, second_dep, last_arrival):
         dt_start = time_to_datetime(first_dep) - timedelta(minutes=60)
         dt_land = time_to_datetime(first_arrival)
@@ -188,49 +190,36 @@ with tab2:
         # Colour-coded Actual Duty Length
         time_diff_hours = allowable_duty - duty_length_hours
         if duty_length_hours > allowable_duty:
-            st.markdown(
-                f"<span style='color:red; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)} "
-                f"(Over allowable duty by {format_timedelta(timedelta(hours=duty_length_hours - allowable_duty))})</span>",
-                unsafe_allow_html=True
-            )
+            color = "red"
         elif time_diff_hours < 1:
-            st.markdown(
-                f"<span style='color:orange; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
-                unsafe_allow_html=True
-            )
+            color = "orange"
         else:
-            st.markdown(
-                f"<span style='color:green; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
-                unsafe_allow_html=True
-            )
+            color = "green"
+        st.markdown(
+            f"<span style='color:{color}; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
+            unsafe_allow_html=True
+        )
 
-
+# --- Tab 3: Rest Calculator ---
 with tab3:
     st.header("Assumed vs Deemed Rest Calculator")
     landing_input = st.text_input("Crew Landing Time (HHMM or HH:MM)", value=st.session_state.rest_landing, key="rest_landing")
     duty_end_input = st.text_input("Override Duty End Time (optional)", value=st.session_state.rest_duty_end, key="rest_duty_end")
 
     landing_time = parse_time(landing_input)
-
     duty_end_time = parse_time(duty_end_input) if duty_end_input.strip() else None
 
     if landing_time:
         default_duty_end_dt = time_to_datetime(landing_time) + timedelta(minutes=15)
-        if duty_end_time:
-            duty_end_dt = time_to_datetime(duty_end_time)
-        else:
-            duty_end_dt = default_duty_end_dt
+        duty_end_dt = time_to_datetime(duty_end_time) if duty_end_time else default_duty_end_dt
 
-        # Check deemed rest window (20:00 to 02:00 inclusive)
         duty_end_hour = duty_end_dt.time().hour
         duty_end_min = duty_end_dt.time().minute
-        # Condition: duty_end between 20:00 and 23:59 or 00:00 to 02:00 inclusive
         if (duty_end_hour >= 20) or (duty_end_hour < 2) or (duty_end_hour == 2 and duty_end_min == 0):
             rest_end_dt = duty_end_dt + timedelta(hours=10)
             rest_type = "Deemed Rest"
             rest_color = "orange"
         else:
-            # Assumed rest ends at 06:00 next day if duty ends before 6:00 else same day 06:00
             assumed_rest_end_dt = datetime.combine(duty_end_dt.date(), time(6,0))
             if duty_end_dt.time() >= time(6,0):
                 assumed_rest_end_dt += timedelta(days=1)
@@ -246,18 +235,3 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
