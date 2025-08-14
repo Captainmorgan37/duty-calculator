@@ -48,18 +48,26 @@ def init_session_state():
 
 init_session_state()
 
-def clear_all_inputs():
-    keys_to_clear = [
-        # Input fields
-        "duty_dep", "duty_arr",
-        "split_first_dep", "split_first_arrival", "split_second_dep", "split_last_arrival",
-        "rest_landing", "rest_duty_end",
+def clear_inputs(tab_name):
+    tab_keys = {
+        "tab1": [
+            "duty_dep", "duty_arr",
+            "duty_start_str", "duty_end_str",
+            "allowable_duty_str", "actual_duty_str"
+        ],
+        "tab2": [
+            "split_first_dep", "split_first_arrival", "split_second_dep", "split_last_arrival",
+            "duty_start_str", "duty_end_str",
+            "ground_rest_str", "allowable_duty_str", "actual_duty_str"
+        ],
+        "tab3": [
+            "rest_landing", "rest_duty_end",
+            "duty_start_str", "duty_end_str",
+            "allowable_duty_str", "actual_duty_str"
+        ]
+    }
 
-        # Output-related storage
-        "duty_start_str", "duty_end_str",
-        "ground_rest_str", "allowable_duty_str", "actual_duty_str"
-    ]
-    for key in keys_to_clear:
+    for key in tab_keys.get(tab_name, []):
         st.session_state[key] = ""
 
 # Title and Clear All button at top-right
@@ -72,6 +80,11 @@ with col2:
 
 # Tabs for the three calculators
 tab1, tab2, tab3 = st.tabs(["Duty Calculator", "Split Duty Calculator", "Rest Calculator"])
+
+with tab1:
+    st.header("Standard Duty Calculator")
+    if st.button("Clear Tab 1 Data"):
+        clear_inputs("tab1")
 
 with tab1:
     st.header("Duty Calculator")
@@ -110,6 +123,11 @@ with tab1:
             st.markdown(f"**Earliest Next Departure:** {earliest_next_dep.strftime('%H:%M')}")
         else:
             st.markdown("**Earliest Next Departure:** —")
+
+with tab2:
+    st.header("Split Duty Calculator")
+    if st.button("Clear Tab 2 Data"):
+        clear_inputs("tab2")
 
 with tab2:
     st.header("Split Duty Calculator")
@@ -184,6 +202,10 @@ else:
     )
 
 
+with tab3:
+    st.header("Rest Period Calculator")
+    if st.button("Clear Tab 3 Data"):
+        clear_inputs("tab3")
 
 with tab3:
     st.header("Assumed vs Deemed Rest Calculator")
@@ -226,6 +248,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
