@@ -86,7 +86,6 @@ with tab1:
     if st.button("Clear Tab 1 Data"):
         clear_inputs("tab1")
 
-with tab1:
     st.header("Duty Calculator")
     st.markdown("**<span style='color:red;'>MAX DUTY: 14 HOURS</span>**", unsafe_allow_html=True)
 
@@ -129,7 +128,7 @@ with tab2:
     if st.button("Clear Tab 2 Data"):
         clear_inputs("tab2")
 
-with tab2:
+
     st.header("Split Duty Calculator")
     split_first_dep_input = st.text_input("First Flight Departure Time (UTC - HHMM or HH:MM)", value=st.session_state.split_first_dep, key="split_first_dep")
     split_first_arrival_input = st.text_input("Landing Time Before Split (UTC - HHMM or HH:MM)", value=st.session_state.split_first_arrival, key="split_first_arrival")
@@ -207,7 +206,7 @@ with tab3:
     if st.button("Clear Tab 3 Data"):
         clear_inputs("tab3")
 
-with tab3:
+
     st.header("Assumed vs Deemed Rest Calculator")
     landing_input = st.text_input("Crew Landing Time (HHMM or HH:MM)", value=st.session_state.rest_landing, key="rest_landing")
     duty_end_input = st.text_input("Override Duty End Time (optional)", value=st.session_state.rest_duty_end, key="rest_duty_end")
@@ -248,6 +247,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
