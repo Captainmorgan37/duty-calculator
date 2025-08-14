@@ -120,16 +120,33 @@ with tab1:
 
 with tab2:
     st.header("Split Duty Calculator")
-    split_first_dep_input = st.text_input("First Flight Departure Time (UTC - HHMM or HH:MM)", value=st.session_state.split_first_dep, key="split_first_dep")
-    split_first_arrival_input = st.text_input("Landing Time Before Split (UTC - HHMM or HH:MM)", value=st.session_state.split_first_arrival, key="split_first_arrival")
-    split_second_dep_input = st.text_input("Departure Time After Split (UTC - HHMM or HH:MM)", value=st.session_state.split_second_dep, key="split_second_dep")
-    split_last_arrival_input = st.text_input("Last Flight Arrival Time (UTC - HHMM or HH:MM)", value=st.session_state.split_last_arrival, key="split_last_arrival")
+    split_first_dep_input = st.text_input(
+        "First Flight Departure Time (UTC - HHMM or HH:MM)",
+        value=st.session_state.split_first_dep,
+        key="split_first_dep"
+    )
+    split_first_arrival_input = st.text_input(
+        "Landing Time Before Split (UTC - HHMM or HH:MM)",
+        value=st.session_state.split_first_arrival,
+        key="split_first_arrival"
+    )
+    split_second_dep_input = st.text_input(
+        "Departure Time After Split (UTC - HHMM or HH:MM)",
+        value=st.session_state.split_second_dep,
+        key="split_second_dep"
+    )
+    split_last_arrival_input = st.text_input(
+        "Last Flight Arrival Time (UTC - HHMM or HH:MM)",
+        value=st.session_state.split_last_arrival,
+        key="split_last_arrival"
+    )
 
     first_dep = parse_time(split_first_dep_input)
     first_arrival = parse_time(split_first_arrival_input)
     second_dep = parse_time(split_second_dep_input)
     last_arrival = parse_time(split_last_arrival_input)
 
+    # Only run if ALL fields are filled
     if None not in (first_dep, first_arrival, second_dep, last_arrival):
         dt_start = time_to_datetime(first_dep) - timedelta(minutes=60)
         dt_land = time_to_datetime(first_arrival)
@@ -155,40 +172,37 @@ with tab2:
         duty_length_td = dt_end - dt_start
         duty_length_hours = duty_length_td.total_seconds() / 3600
 
+        # Output
         st.write(f"Duty Start (60 min before first departure): {dt_start.time().strftime('%H:%M')}")
         st.write(f"Duty End (15 min after last arrival): {dt_end.time().strftime('%H:%M')}")
-
-        # Show ground rest in HH:MM format
         st.write(f"Ground Rest Duration: {format_timedelta(ground_rest_td)}")
 
-        # Warning if ground rest < 6 hours
         if ground_rest_hours < 6:
-            st.markdown("<span style='color:red; font-weight:bold;'>Split Duty Day not applicable as ground rest is less than 6:00 hours!</span>", unsafe_allow_html=True)
+            st.markdown(
+                "<span style='color:red; font-weight:bold;'>Split Duty Day not applicable as ground rest is less than 6:00 hours!</span>",
+                unsafe_allow_html=True
+            )
 
         st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
 
-# Colour-coded Actual Duty Length
-time_diff_hours = allowable_duty - duty_length_hours
-
-if duty_length_hours > allowable_duty:
-    # Over allowable duty
-    st.markdown(
-        f"<span style='color:red; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)} "
-        f"(Over allowable duty by {format_timedelta(timedelta(hours=duty_length_hours - allowable_duty))})</span>",
-        unsafe_allow_html=True
-    )
-elif time_diff_hours < 1:
-    # Within 1 hour under allowable duty (Yellow)
-    st.markdown(
-        f"<span style='color:orange; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
-        unsafe_allow_html=True
-    )
-else:
-    # 1 hour or more under allowable duty (Green)
-    st.markdown(
-        f"<span style='color:green; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
-        unsafe_allow_html=True
-    )
+        # Colour-coded Actual Duty Length
+        time_diff_hours = allowable_duty - duty_length_hours
+        if duty_length_hours > allowable_duty:
+            st.markdown(
+                f"<span style='color:red; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)} "
+                f"(Over allowable duty by {format_timedelta(timedelta(hours=duty_length_hours - allowable_duty))})</span>",
+                unsafe_allow_html=True
+            )
+        elif time_diff_hours < 1:
+            st.markdown(
+                f"<span style='color:orange; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f"<span style='color:green; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
+                unsafe_allow_html=True
+            )
 
 
 with tab3:
@@ -232,6 +246,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
