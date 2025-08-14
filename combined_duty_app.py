@@ -157,10 +157,29 @@ with tab2:
         st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
         st.write(f"Actual Duty Length: {format_timedelta(duty_length_td)}")
 
-        if duty_length_hours > allowable_duty:
-            st.markdown(f"<span style='color:red;'>Over allowable duty by {format_timedelta(timedelta(hours=duty_length_hours - allowable_duty))}</span>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<span style='color:green;'>Within allowable duty</span>", unsafe_allow_html=True)
+# Colour-coded Actual Duty Length
+time_diff_hours = allowable_duty - duty_length_hours
+
+if duty_length_hours > allowable_duty:
+    # Over allowable duty
+    st.markdown(
+        f"<span style='color:red; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)} "
+        f"(Over allowable duty by {format_timedelta(timedelta(hours=duty_length_hours - allowable_duty))})</span>",
+        unsafe_allow_html=True
+    )
+elif time_diff_hours < 1:
+    # Within 1 hour under allowable duty (Yellow)
+    st.markdown(
+        f"<span style='color:orange; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
+        unsafe_allow_html=True
+    )
+else:
+    # 1 hour or more under allowable duty (Green)
+    st.markdown(
+        f"<span style='color:green; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
+        unsafe_allow_html=True
+    )
+
 
 
 with tab3:
@@ -204,6 +223,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
