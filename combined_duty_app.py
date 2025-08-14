@@ -152,7 +152,7 @@ with tab2:
 
         # Warning if ground rest < 6 hours
         if ground_rest_hours < 6:
-            st.markdown("<span style='color:red; font-weight:bold;'>WARNING: Ground rest is less than 6:00 hours!</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color:red; font-weight:bold;'>Split Duty Day not applicable as ground rest is less than 6:00 hours!</span>", unsafe_allow_html=True)
 
         st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
         st.write(f"Actual Duty Length: {format_timedelta(duty_length_td)}")
@@ -204,6 +204,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
