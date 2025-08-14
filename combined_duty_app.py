@@ -48,12 +48,16 @@ def init_session_state():
 
 init_session_state()
 
-# Clear all relevant inputs except other settings
 def clear_all_inputs():
     keys_to_clear = [
+        # Input fields
         "duty_dep", "duty_arr",
         "split_first_dep", "split_first_arrival", "split_second_dep", "split_last_arrival",
         "rest_landing", "rest_duty_end",
+
+        # Output-related storage
+        "duty_start_str", "duty_end_str",
+        "ground_rest_str", "allowable_duty_str", "actual_duty_str"
     ]
     for key in keys_to_clear:
         st.session_state[key] = ""
@@ -222,6 +226,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
