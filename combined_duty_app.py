@@ -98,6 +98,8 @@ with tab1:
         key="duty_arr"
     )
 
+# Only calculate if BOTH inputs are non-blank
+if dep_str.strip() != "" and arr_str.strip() != "":
     dep_time = parse_time(dep_str)
     arr_time = parse_time(arr_str)
 
@@ -243,4 +245,5 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
