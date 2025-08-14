@@ -141,7 +141,8 @@ with tab2:
         if ground_rest_hours >= 6:
             allowable_duty += min((ground_rest_hours - 2) / 2, 3)
 
-
+        duty_length_td = dt_end - dt_start
+        duty_length_hours = duty_length_td.total_seconds() / 3600
 
         st.write(f"Duty Start (60 min before first departure): {dt_start.time().strftime('%H:%M')}")
         st.write(f"Duty End (15 min after last arrival): {dt_end.time().strftime('%H:%M')}")
@@ -154,7 +155,6 @@ with tab2:
             st.markdown("<span style='color:red; font-weight:bold;'>Split Duty Day not applicable as ground rest is less than 6:00 hours!</span>", unsafe_allow_html=True)
 
         st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
-        st.write(f"Actual Duty Length: {format_timedelta(duty_length_td)}")
 
 # Colour-coded Actual Duty Length
 time_diff_hours = allowable_duty - duty_length_hours
@@ -222,6 +222,7 @@ with tab3:
         st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
         st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
