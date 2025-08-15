@@ -201,7 +201,7 @@ with tab3:
     # Split/Unforeseen Duty Day Toggle
     split_duty_toggle = st.checkbox(
         "Split/Unforeseen Duty Day",
-        help="If total duty exceeds 14:00, required rest increases by the excess."
+        help="If total duty exceeds 14:00 and rest type is Deemed Rest, required rest increases by the excess."
     )
 
     duty_length_time = None
@@ -216,7 +216,6 @@ with tab3:
         landing_time = parse_time(landing_input)
         duty_end_time = parse_time(duty_end_input) if duty_end_input.strip() != "" else None
 
-        # Only calculate if split duty is OFF or duty length has been entered
         if landing_time and (not split_duty_toggle or duty_length_time):
             default_duty_end_dt = time_to_datetime(landing_time) + timedelta(minutes=15)
             duty_end_dt = time_to_datetime(duty_end_time) if duty_end_time else default_duty_end_dt
@@ -224,7 +223,7 @@ with tab3:
             duty_end_hour = duty_end_dt.time().hour
             duty_end_min = duty_end_dt.time().minute
 
-            # Determine base rest requirement
+            # Determine rest type
             if (duty_end_hour >= 20) or (duty_end_hour < 2) or (duty_end_hour == 2 and duty_end_min == 0):
                 rest_end_dt = duty_end_dt + timedelta(hours=10)
                 rest_type = "Deemed Rest"
@@ -241,8 +240,8 @@ with tab3:
             if ftl_extension:
                 rest_end_dt += timedelta(hours=1)
 
-            # Apply split/unforeseen duty extension if applicable
-            if split_duty_toggle and duty_length_time:
+            # Apply split/unforeseen duty extension ONLY if rest is Deemed
+            if split_duty_toggle and duty_length_time and rest_type == "Deemed Rest":
                 duty_length_hours = duty_length_time.hour + duty_length_time.minute / 60
                 if duty_length_hours > 14:
                     extra_hours = duty_length_hours - 14
