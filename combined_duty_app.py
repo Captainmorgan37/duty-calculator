@@ -181,8 +181,22 @@ with tab2:
 # ---------------- Tab 3: Rest Calculator ----------------
 with tab3:
     st.header("Assumed vs Deemed Rest Calculator")
-    landing_input = st.text_input("Crew Landing Time (HHMM or HH:MM)", value=st.session_state.rest_landing, key="rest_landing")
-    duty_end_input = st.text_input("Override Duty End Time (optional)", value=st.session_state.rest_duty_end, key="rest_duty_end")
+    landing_input = st.text_input(
+        "Crew Landing Time (HHMM or HH:MM)",
+        value=st.session_state.rest_landing,
+        key="rest_landing"
+    )
+    duty_end_input = st.text_input(
+        "Override Duty End Time (optional)",
+        value=st.session_state.rest_duty_end,
+        key="rest_duty_end"
+    )
+
+    # FTL Extension Toggle
+    ftl_extension = st.checkbox(
+        "FTL Extension",
+        help="Adds 1 hour to required rest and pushes back rest end, callout, and departure times."
+    )
 
     if landing_input.strip() != "":
         landing_time = parse_time(landing_input)
@@ -207,6 +221,10 @@ with tab3:
                 rest_type = "Assumed Rest"
                 rest_color = "green"
 
+            # Apply FTL extension if enabled
+            if ftl_extension:
+                rest_end_dt += timedelta(hours=1)
+
             callout_dt = rest_end_dt
             departure_dt = callout_dt + timedelta(hours=2, minutes=30)
 
@@ -215,4 +233,6 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
+
 
