@@ -195,7 +195,7 @@ with tab3:
     # FTL Extension Toggle
     ftl_extension = st.checkbox(
         "FTL Extension",
-        help="Adds 1 hour to required rest and pushes back rest end, callout, and departure times."
+        help="Adds 1 hour to required rest (only for Deemed Rest)."
     )
 
     # Split/Unforeseen Duty Day Toggle
@@ -236,11 +236,11 @@ with tab3:
                 rest_type = "Assumed Rest"
                 rest_color = "green"
 
-            # Apply FTL extension if enabled
-            if ftl_extension:
+            # Apply FTL extension ONLY if rest is Deemed Rest
+            if ftl_extension and rest_type == "Deemed Rest":
                 rest_end_dt += timedelta(hours=1)
 
-            # Apply split/unforeseen duty extension ONLY if rest is Deemed
+            # Apply split/unforeseen duty extension ONLY if rest is Deemed Rest
             if split_duty_toggle and duty_length_time and rest_type == "Deemed Rest":
                 duty_length_hours = duty_length_time.hour + duty_length_time.minute / 60
                 if duty_length_hours > 14:
