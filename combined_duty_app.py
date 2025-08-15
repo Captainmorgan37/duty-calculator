@@ -198,24 +198,40 @@ with tab3:
         help="Adds 1 hour to required rest and pushes back rest end, callout, and departure times."
     )
 
+    # Split/Unforeseen Duty Day Toggle
+    split_duty_toggle = st.checkbox(
+        "Split/Unforeseen Duty Day",
+        help="If total duty exceeds 14:00, required rest increases by the excess."
+    )
+
+    duty_length_time = None
+    if split_duty_toggle:
+        duty_length_input = st.text_input(
+            "Total Duty Length (HHMM or HH:MM)",
+            key="split_duty_length"
+        )
+        duty_length_time = parse_time(duty_length_input) if duty_length_input.strip() != "" else None
+
     if landing_input.strip() != "":
         landing_time = parse_time(landing_input)
         duty_end_time = parse_time(duty_end_input) if duty_end_input.strip() != "" else None
 
-        if landing_time:
+        # Only calculate if split duty is OFF or duty length has been entered
+        if landing_time and (not split_duty_toggle or duty_length_time):
             default_duty_end_dt = time_to_datetime(landing_time) + timedelta(minutes=15)
             duty_end_dt = time_to_datetime(duty_end_time) if duty_end_time else default_duty_end_dt
 
             duty_end_hour = duty_end_dt.time().hour
             duty_end_min = duty_end_dt.time().minute
 
+            # Determine base rest requirement
             if (duty_end_hour >= 20) or (duty_end_hour < 2) or (duty_end_hour == 2 and duty_end_min == 0):
                 rest_end_dt = duty_end_dt + timedelta(hours=10)
                 rest_type = "Deemed Rest"
                 rest_color = "orange"
             else:
-                assumed_rest_end_dt = datetime.combine(duty_end_dt.date(), time(6,0))
-                if duty_end_dt.time() >= time(6,0):
+                assumed_rest_end_dt = datetime.combine(duty_end_dt.date(), time(6, 0))
+                if duty_end_dt.time() >= time(6, 0):
                     assumed_rest_end_dt += timedelta(days=1)
                 rest_end_dt = assumed_rest_end_dt
                 rest_type = "Assumed Rest"
@@ -225,6 +241,13 @@ with tab3:
             if ftl_extension:
                 rest_end_dt += timedelta(hours=1)
 
+            # Apply split/unforeseen duty extension if applicable
+            if split_duty_toggle and duty_length_time:
+                duty_length_hours = duty_length_time.hour + duty_length_time.minute / 60
+                if duty_length_hours > 14:
+                    extra_hours = duty_length_hours - 14
+                    rest_end_dt += timedelta(hours=extra_hours)
+
             callout_dt = rest_end_dt
             departure_dt = callout_dt + timedelta(hours=2, minutes=30)
 
@@ -233,6 +256,3 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
-
-
-
