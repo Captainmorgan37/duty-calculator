@@ -192,17 +192,27 @@ with tab3:
         key="rest_duty_end"
     )
 
-    # FTL Extension Toggle
-    ftl_extension = st.checkbox(
-        "FTL Extension",
-        help="Adds 1 hour to required rest (only for Deemed Rest)."
-    )
+    # Mutually exclusive toggles
+    col1, col2 = st.columns(2)
+    with col1:
+        ftl_extension = st.checkbox(
+            "FTL Extension",
+            help="Adds 1 hour to required rest (only for Deemed Rest).",
+            key="ftl_extension"
+        )
+    with col2:
+        split_duty_toggle = st.checkbox(
+            "Split/Unforeseen Duty Day",
+            help="If total duty exceeds 14:00 and rest type is Deemed Rest, required rest increases by the excess.",
+            key="split_duty_toggle"
+        )
 
-    # Split/Unforeseen Duty Day Toggle
-    split_duty_toggle = st.checkbox(
-        "Split/Unforeseen Duty Day",
-        help="If total duty exceeds 14:00 and rest type is Deemed Rest, required rest increases by the excess."
-    )
+    # Enforce exclusivity
+    if ftl_extension and split_duty_toggle:
+        if st.session_state.ftl_extension:
+            st.session_state.split_duty_toggle = False
+        elif st.session_state.split_duty_toggle:
+            st.session_state.ftl_extension = False
 
     duty_length_time = None
     if split_duty_toggle:
