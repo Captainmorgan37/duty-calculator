@@ -181,45 +181,23 @@ with tab2:
 # ---------------- Tab 3: Rest Calculator ----------------
 with tab3:
     st.header("Assumed vs Deemed Rest Calculator")
-    landing_input = st.text_input(
-        "Crew Landing Time (HHMM or HH:MM)",
-        value=st.session_state.rest_landing,
-        key="rest_landing"
-    )
-    duty_end_input = st.text_input(
-        "Override Duty End Time (optional)",
-        value=st.session_state.rest_duty_end,
-        key="rest_duty_end"
-    )
+    landing_input = st.text_input("Crew Landing Time (HHMM or HH:MM)", value=st.session_state.rest_landing, key="rest_landing")
+    duty_end_input = st.text_input("Override Duty End Time (optional)", value=st.session_state.rest_duty_end, key="rest_duty_end")
 
-    # Mutually exclusive toggles
+    # Check the current values first
+    ftl_disabled = st.session_state.get("split_duty_toggle", False)
+    split_disabled = st.session_state.get("ftl_extension", False)
+
     col1, col2 = st.columns(2)
     with col1:
-        ftl_extension = st.checkbox(
-            "FTL Extension",
-            help="Adds 1 hour to required rest (only for Deemed Rest).",
-            key="ftl_extension"
-        )
+        ftl_extension = st.checkbox("FTL Extension", key="ftl_extension", disabled=ftl_disabled)
     with col2:
-        split_duty_toggle = st.checkbox(
-            "Split/Unforeseen Duty Day",
-            help="If total duty exceeds 14:00 and rest type is Deemed Rest, required rest increases by the excess.",
-            key="split_duty_toggle"
-        )
+        split_duty_toggle = st.checkbox("Split/Unforeseen Duty Day", key="split_duty_toggle", disabled=split_disabled)
 
-    # Enforce exclusivity
-    if ftl_extension and split_duty_toggle:
-        if st.session_state.ftl_extension:
-            st.session_state.split_duty_toggle = False
-        elif st.session_state.split_duty_toggle:
-            st.session_state.ftl_extension = False
-
+    # Show extra duty length box only if split toggle is on
     duty_length_time = None
     if split_duty_toggle:
-        duty_length_input = st.text_input(
-            "Total Duty Length (HHMM or HH:MM)",
-            key="split_duty_length"
-        )
+        duty_length_input = st.text_input("Total Duty Length (HHMM or HH:MM)", key="split_duty_length")
         duty_length_time = parse_time(duty_length_input) if duty_length_input.strip() != "" else None
 
     if landing_input.strip() != "":
