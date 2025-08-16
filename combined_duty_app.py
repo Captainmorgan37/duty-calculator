@@ -71,7 +71,7 @@ with col2:
 # Explanatory note shown across all tabs
 st.markdown(
     "<span style='color:gray; font-style:italic;'>All duty starts are calculated with the standard 60 minutes. "
-    "For priority clients, please remember that if possible, an extra 30 minutes will be added to the duty start.</span>",
+    "For priority clients, please remember that if possible, an extra 30 minutes will be added to the duty start. The 90 minutes is not required to make an itinerary feasible.</span>",
     unsafe_allow_html=True
 )
 
@@ -250,5 +250,6 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
