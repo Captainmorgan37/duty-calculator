@@ -91,9 +91,9 @@ with tab1:
     )
 
   # Only run if both fields have some text
-if dep_str.strip() and arr_str.strip():
-    dep_time = parse_time(dep_str)
-    arr_time = parse_time(arr_str)
+    if dep_str.strip() and arr_str.strip():
+        dep_time = parse_time(dep_str)
+        arr_time = parse_time(arr_str)
 
     if dep_time and arr_time:
         duty_start = datetime.combine(datetime.today(), dep_time) - timedelta(minutes=60)
@@ -254,6 +254,7 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
