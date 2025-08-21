@@ -90,40 +90,44 @@ with tab1:
         key="duty_arr"
     )
 
-    # Only run if both fields have some text
-    if dep_str.strip() and arr_str.strip():
-        dep_time = parse_time(dep_str)
-        arr_time = parse_time(arr_str)
+  # Only run if both fields have some text
+if dep_str.strip() and arr_str.strip():
+    dep_time = parse_time(dep_str)
+    arr_time = parse_time(arr_str)
 
     if dep_time and arr_time:
         duty_start = datetime.combine(datetime.today(), dep_time) - timedelta(minutes=60)
         duty_end = datetime.combine(datetime.today(), arr_time) + timedelta(minutes=15)
 
-    # Handle rollover past midnight
-    if duty_end <= duty_start:
-        duty_end += timedelta(days=1)
+        # Handle rollover past midnight
+        if duty_end <= duty_start:
+            duty_end += timedelta(days=1)
 
-    duty_length_td = duty_end - duty_start
-    duty_length_hours = duty_length_td.total_seconds() / 3600
+        duty_length_td = duty_end - duty_start
+        duty_length_hours = duty_length_td.total_seconds() / 3600
 
-            # Colour coding
-            if duty_length_hours < 13:
-                color = "green"
-            elif 13 <= duty_length_hours < 14:
-                color = "yellow"
-            else:
-                color = "red"
+        # Colour coding
+        if duty_length_hours < 13:
+            color = "green"
+        elif 13 <= duty_length_hours < 14:
+            color = "yellow"
+        else:
+            color = "red"
 
-            st.markdown(f"**Duty Start:** {duty_start.strftime('%H:%M')}")
-            st.markdown(f"**Duty End:** {duty_end.strftime('%H:%M')}")
-            st.markdown(f"<span style='color:{color}; font-weight:bold;'>Duty Length: {format_timedelta(duty_length_td)}</span>", unsafe_allow_html=True)
+        st.markdown(f"**Duty Start:** {duty_start.strftime('%H:%M')}")
+        st.markdown(f"**Duty End:** {duty_end.strftime('%H:%M')}")
+        st.markdown(
+            f"<span style='color:{color}; font-weight:bold;'>Duty Length: {format_timedelta(duty_length_td)}</span>",
+            unsafe_allow_html=True
+        )
 
-            # Earliest Next Departure
-            if duty_length_hours < 14:
-                earliest_next_dep = duty_end + timedelta(hours=11)
-                st.markdown(f"**Earliest Next Departure:** {earliest_next_dep.strftime('%H:%M')}")
-            else:
-                st.markdown("**Earliest Next Departure:** —")
+        # Earliest Next Departure
+        if duty_length_hours < 14:
+            earliest_next_dep = duty_end + timedelta(hours=11)
+            st.markdown(f"**Earliest Next Departure:** {earliest_next_dep.strftime('%H:%M')}")
+        else:
+            st.markdown("**Earliest Next Departure:** —")
+
 
 
 # ---------------- Tab 2: Split Duty Calculator ----------------
@@ -250,6 +254,7 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
