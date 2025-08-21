@@ -95,11 +95,16 @@ with tab1:
         dep_time = parse_time(dep_str)
         arr_time = parse_time(arr_str)
 
-        if dep_time and arr_time:
-            duty_start = datetime.combine(datetime.today(), dep_time) - timedelta(minutes=60)
-            duty_end = datetime.combine(datetime.today(), arr_time) + timedelta(minutes=15)
-            duty_length_td = duty_end - duty_start
-            duty_length_hours = duty_length_td.total_seconds() / 3600
+if dep_time and arr_time:
+    duty_start = datetime.combine(datetime.today(), dep_time) - timedelta(minutes=60)
+    duty_end = datetime.combine(datetime.today(), arr_time) + timedelta(minutes=15)
+
+    # Handle rollover past midnight
+    if duty_end <= duty_start:
+        duty_end += timedelta(days=1)
+
+    duty_length_td = duty_end - duty_start
+    duty_length_hours = duty_length_td.total_seconds() / 3600
 
             # Colour coding
             if duty_length_hours < 13:
@@ -245,6 +250,7 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
