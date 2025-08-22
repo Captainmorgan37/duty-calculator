@@ -180,7 +180,7 @@ with tab2:
 
 # ---------- NEW CHECK ----------
 if ground_rest_td >= timedelta(hours=11, minutes=15):
-    st.markdown("**Allowable Duty Length:** REST DUTY DAY")
+    st.markdown("**Allowable Duty Length:** RESET DUTY DAY")
 else:
     # Normal Allowable Duty Length
     st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
@@ -260,6 +260,7 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
