@@ -132,12 +132,33 @@ with tab1:
 with tab2:
     st.header("Split Duty Calculator")
 
-    split_first_dep_input = st.text_input("First Flight Departure Time (UTC - HHMM or HH:MM)", value=st.session_state.split_first_dep, key="split_first_dep")
-    split_first_arrival_input = st.text_input("Landing Time Before Split (UTC - HHMM or HH:MM)", value=st.session_state.split_first_arrival, key="split_first_arrival")
-    split_second_dep_input = st.text_input("Departure Time After Split (UTC - HHMM or HH:MM)", value=st.session_state.split_second_dep, key="split_second_dep")
-    split_last_arrival_input = st.text_input("Last Flight Arrival Time (UTC - HHMM or HH:MM)", value=st.session_state.split_last_arrival, key="split_last_arrival")
+    split_first_dep_input = st.text_input(
+        "First Flight Departure Time (UTC - HHMM or HH:MM)",
+        value=st.session_state.split_first_dep,
+        key="split_first_dep"
+    )
+    split_first_arrival_input = st.text_input(
+        "Landing Time Before Split (UTC - HHMM or HH:MM)",
+        value=st.session_state.split_first_arrival,
+        key="split_first_arrival"
+    )
+    split_second_dep_input = st.text_input(
+        "Departure Time After Split (UTC - HHMM or HH:MM)",
+        value=st.session_state.split_second_dep,
+        key="split_second_dep"
+    )
+    split_last_arrival_input = st.text_input(
+        "Last Flight Arrival Time (UTC - HHMM or HH:MM)",
+        value=st.session_state.split_last_arrival,
+        key="split_last_arrival"
+    )
 
-    if all(field.strip() != "" for field in [split_first_dep_input, split_first_arrival_input, split_second_dep_input, split_last_arrival_input]):
+    if all(field.strip() != "" for field in [
+        split_first_dep_input,
+        split_first_arrival_input,
+        split_second_dep_input,
+        split_last_arrival_input
+    ]):
         first_dep = parse_time(split_first_dep_input)
         first_arrival = parse_time(split_first_arrival_input)
         second_dep = parse_time(split_second_dep_input)
@@ -174,27 +195,40 @@ with tab2:
             st.write(f"Ground Rest Duration: {format_timedelta(ground_rest_td)}")
 
             if ground_rest_hours < 6:
-                st.markdown("<span style='color:red; font-weight:bold;'>Split Duty Day not applicable as ground rest is less than 6:00 hours!</span>", unsafe_allow_html=True)
+                st.markdown(
+                    "<span style='color:red; font-weight:bold;'>Split Duty Day not applicable as ground rest is less than 6:00 hours!</span>",
+                    unsafe_allow_html=True
+                )
 
-            st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
-
-        # ---------- NEW CHECK ----------
-        if ground_rest_td >= timedelta(hours=11, minutes=15):
-            st.markdown("<span style='color:red; font-size:20px; font-weight:bold;'>ALLOWABLE DUTY LENGTH: RESET DUTY DAY</span>",
-        unsafe_allow_html=True
-    )
-        else:
-            # Normal Allowable Duty Length
-            st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
-        
-            # Colour-coded Actual Duty Length
-            if duty_length_hours > allowable_duty:
-                st.markdown(f"<span style='color:red; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)} "
-                            f"(Over allowable duty by {format_timedelta(timedelta(hours=duty_length_hours - allowable_duty))})</span>", unsafe_allow_html=True)
-            elif time_diff_hours < 1:
-                st.markdown(f"<span style='color:orange; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>", unsafe_allow_html=True)
+            # ---------- Allowable Duty / Reset Duty Check ----------
+            if ground_rest_td >= timedelta(hours=11, minutes=15):
+                # Reset Duty Day
+                st.markdown(
+                    "<span style='color:red; font-size:20px; font-weight:bold;'>ALLOWABLE DUTY LENGTH: RESET DUTY DAY</span>",
+                    unsafe_allow_html=True
+                )
             else:
-                st.markdown(f"<span style='color:green; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>", unsafe_allow_html=True)
+                # Normal Allowable Duty Length
+                st.write(f"Allowable Duty Length: {format_timedelta(timedelta(hours=allowable_duty))}")
+
+                # Colour-coded Actual Duty Length
+                if duty_length_hours > allowable_duty:
+                    st.markdown(
+                        f"<span style='color:red; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)} "
+                        f"(Over allowable duty by {format_timedelta(timedelta(hours=duty_length_hours - allowable_duty))})</span>",
+                        unsafe_allow_html=True
+                    )
+                elif time_diff_hours < 1:
+                    st.markdown(
+                        f"<span style='color:orange; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(
+                        f"<span style='color:green; font-weight:bold;'>Actual Duty Length: {format_timedelta(duty_length_td)}</span>",
+                        unsafe_allow_html=True
+                    )
+
 # -------------------------------
 
 # ---------------- Tab 3: Rest Calculator ----------------
@@ -262,6 +296,7 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
