@@ -126,7 +126,7 @@ with tab1:
                 earliest_next_dep = duty_end + timedelta(hours=11)
                 st.markdown(f"**Earliest Next Departure UTC:** {earliest_next_dep.strftime('%H:%M')}")
             else:
-                st.markdown("**Earliest Next Departure:** —")
+                st.markdown("**Earliest Next Departure UTC:** —")
 
 # ---------------- Tab 2: Split Duty Calculator ----------------
 with tab2:
@@ -296,6 +296,7 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
