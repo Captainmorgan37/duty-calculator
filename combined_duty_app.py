@@ -114,8 +114,8 @@ with tab1:
             else:
                 color = "red"
 
-            st.markdown(f"**Duty Start UTC:** {duty_start.strftime('%H:%M')}")
-            st.markdown(f"**Duty End UTC:** {duty_end.strftime('%H:%M')}")
+            st.markdown(f"**Duty Start (UTC):** {duty_start.strftime('%H:%M')}")
+            st.markdown(f"**Duty End (UTC):** {duty_end.strftime('%H:%M')}")
             st.markdown(
                 f"<span style='color:{color}; font-weight:bold;'>Duty Length: {format_timedelta(duty_length_td)}</span>",
                 unsafe_allow_html=True
@@ -124,9 +124,9 @@ with tab1:
             # Earliest Next Departure
             if duty_length_hours < 14:
                 earliest_next_dep = duty_end + timedelta(hours=11)
-                st.markdown(f"**Earliest Next Departure UTC:** {earliest_next_dep.strftime('%H:%M')}")
+                st.markdown(f"**Earliest Next Departure (UTC):** {earliest_next_dep.strftime('%H:%M')}")
             else:
-                st.markdown("**Earliest Next Departure UTC:** —")
+                st.markdown("**Earliest Next Departure (UTC):** —")
 
 # ---------------- Tab 2: Split Duty Calculator ----------------
 with tab2:
@@ -296,6 +296,7 @@ with tab3:
             st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
+
 
 
 
