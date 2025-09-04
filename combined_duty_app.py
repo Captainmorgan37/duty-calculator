@@ -291,29 +291,13 @@ with tab3:
             callout_dt = rest_end_dt
             departure_dt = callout_dt + timedelta(hours=2, minutes=30)
 
+            # Build display string for rest end
+            rest_end_display = rest_end_dt.strftime("%H:%M")
+            if rest_type == "Assumed Rest" and rest_end_dt.date() > duty_end_dt.date():
+                rest_end_display += " (+1 day)"
+
             st.markdown(f"**Duty End Time:** {duty_end_dt.strftime('%H:%M')}")
             st.markdown(f"<span style='color:{rest_color}; font-weight:bold;'>Rest Type: {rest_type}</span>", unsafe_allow_html=True)
-            st.markdown(f"**Rest Ends At:** {rest_end_dt.strftime('%H:%M')}")
+            st.markdown(f"**Rest Ends At:** {rest_end_display}")
             st.markdown(f"**Earliest Callout Time:** {callout_dt.strftime('%H:%M')}")
             st.markdown(f"**Earliest Departure Time:** {departure_dt.strftime('%H:%M')}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
